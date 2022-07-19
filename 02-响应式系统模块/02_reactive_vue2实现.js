@@ -97,14 +97,14 @@ watchEffect(function () {
 // info.counter++;
 // info.name = "why222";
 
-foo.height = 1000;
+// foo.height = 1000;
 
-// 打印结果:
-effect1: 200 why
-effect2: 10000
-effect3: 110 why
-effect4: 1.88
-effect4: 1000
+// // 打印结果:
+// effect1: 200 why
+// effect2: 10000
+// effect3: 110 why
+// effect4: 1.88
+// effect4: 1000
 
 // 解析结果:
 // 前四行是在watchEffect()中执行effect()打印出来的原本的数据, 用作对比.

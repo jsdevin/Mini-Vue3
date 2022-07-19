@@ -62,39 +62,39 @@ function reactive(raw) {
 
 // 测试代码
 // info 和 foo 都是代理对象
-const info = reactive({counter: 100, name: "why"});
-const foo = reactive({height: 1.88});
+// const info = reactive({counter: 100, name: "why"});
+// const foo = reactive({height: 1.88});
 
-// watchEffect1
-watchEffect(function () {
-  console.log("effect1:", info.counter * 2, info.name);
-})
+// // watchEffect1
+// watchEffect(function () {
+//   console.log("effect1:", info.counter * 2, info.name);
+// })
 
-// watchEffect2
-watchEffect(function () {
-  console.log("effect2:", info.counter * info.counter);
-})
+// // watchEffect2
+// watchEffect(function () {
+//   console.log("effect2:", info.counter * info.counter);
+// })
 
-// watchEffect3
-watchEffect(function () {
-  console.log("effect3:", info.counter + 10, info.name);
-})
+// // watchEffect3
+// watchEffect(function () {
+//   console.log("effect3:", info.counter + 10, info.name);
+// })
 
-watchEffect(function () {
-  console.log("effect4:", foo.height);
-})
+// watchEffect(function () {
+//   console.log("effect4:", foo.height);
+// })
 
 // info.counter++;
 // info.name = "why222";
 
-foo.height = 9999;
+// foo.height = 9999;
 
-// 打印结果:
-effect1: 200 why
-effect2: 10000
-effect3: 110 why
-effect4: 1.88
-effect4: 9999
+// // 打印结果:
+// effect1: 200 why
+// effect2: 10000
+// effect3: 110 why
+// effect4: 1.88
+// effect4: 9999
 
 // 解析:
 // 前四行是在watchEffect()中执行effect()打印出来的原本的数据, 用作对比.

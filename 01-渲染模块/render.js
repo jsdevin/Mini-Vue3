@@ -20,7 +20,7 @@ const mount = (vnode, container) => {
   if(vnode.props) { // 如果props存在，直接遍历创建属性即可，默认props只有一个属性也使用遍历来创建
     for(const key in vnode.props) { // 遍历属性
       const value = vnode.props[key] // 获得属性值
-      if(key.startsWith('on')) { // 事件
+      if(key.startsWith("on")) { // 事件
         el.addEventListener(key.slice(2).toLowerCase, value)
       }else {
         el.setAttribute(key, value)
@@ -72,18 +72,26 @@ const patch = (oldNode, newNode) => {
     // 取到el对象.
     const el = newNode.el = oldNode.el
     // 2. 处理props
+    const oldProps = oldNode.props || {};
+    const newProps = newNode.props || {};
     // 2.1 将新节点的props添加到旧节点的props中,如果二者存在属性相同,但是属性值不相同的情况,就直接在旧节点中新建一个即可
-    for(const key in newNode.props) {
-      const oldValue =  oldNode.props[key]
-      const newValue =  newNode.props[key]
+    for(const key in newProps) {
+      const oldValue =  oldProps[key]
+      const newValue =  newProps[key]
       if(oldValue !== newValue) { // 属性相同,但是属性值不相同
-        el.setAttribute(key, newValue) // 直接新建一个好了,不使用覆盖的方法
+        if(key.startsWith("on")) { // 对事件监听的判断
+          el.addEventListener(key.slice(2).toLowerCase(), newValue)
+        } else {
+          el.setAttribute(key, newValue) // 直接新建一个好了,不使用覆盖的方法
+        }
       }
     }
     // 2.2 删除只存在于旧节点props中但是不存在于新节点props中的属性
-    const oldProps = oldNode.props || {};
-    const newProps = newNode.props || {};
     for(const key in oldProps) {
+      if(key.startsWith("on")) { // 对事件监听的判断
+        const value = oldProps[key]
+        el.removeEventListener(key.slice(2).toLowerCase(), value)
+      }
       if(!(key in newProps)) {
         el.removeAttribute(key)
       }
@@ -94,7 +102,14 @@ const patch = (oldNode, newNode) => {
     const newChildren = newNode.children || []
     // 3.1 新节点的children类型是字符串,直接innerHTML方法即可
     if(typeof newChildren === 'string') { // 新节点的children类型是字符串
-      oldChildren.innerHTML = newChildren
+      // 边界情况
+      if(typeof oldChildren === 'string') {
+        if(newChildren !== oldChildren) {
+          el.textContent = newChildren
+        }
+      } else {
+        el.innerHTML = newChildren
+      }
     } else { // 3.2 新节点的children类型是数组
       // 3.2.1 如果旧节点的children的类型是string, 简简单单,直接清空旧节点的children,然后挂载新节点的children即可
       if(typeof oldChildren === 'string') {
@@ -114,14 +129,14 @@ const patch = (oldNode, newNode) => {
 
         // 2) 如果存在于新节点的children中(即newChildren.length > oldChildren.length),就需要添加到旧节点中,添加方法就是直接遍历然后使用mount()挂载方法
         if(newChildren.length > oldChildren.length) {
-          newChildren.slice(commonLength).forEach(child => {
+          newChildren.slice(oldChildren.length).forEach(child => {
             mount(child, el)
           })
         }
 
         // 3) 如果存在于旧节点的children中(即newChildren.length < oldChildren.length),就需要删去,删除方法就是直接遍历然后使用removeChild()挂载方法
         if(newChildren.length < oldChildren.length) {
-          oldChildren.slice(commonLength).forEach(item => {
+          oldChildren.slice(newChildren.length).forEach(item => {
             el.removeChild(item.el)
           })
         }

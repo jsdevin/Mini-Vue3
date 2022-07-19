@@ -7,7 +7,7 @@
 该mvvn框架是参考vue3实现的，包括如下内容：  
 - [x] 渲染系统模块  
 - [x] 可响应式系统模块  
-- [ ] 应用程序入口模块  
+- [x] 应用程序入口模块  
   
 ## 渲染系统模块  
 该模块主要包含三个功能.  
@@ -349,3 +349,73 @@ const patch = (oldNode, newNode) => {
 注意：这里的是vue响应式的核心代码，没有考虑边界情况，后续如果有机会回顾的话，可以考虑补充一下边界情况。
 
 ## 应用程序入口模块
+这一个模块的主要作用是将设置一个程序入口，将所有东西串联起来。createApp 会创建一个程序的开端，传入的参数是根组件，返回的结果是挂载好根组件的对象。
+```js
+function createApp(rootComponent) { // rootComponent参数传入的是根组件
+  return { // 返回的是一个对象，然后用这个对象去挂载根节点
+    mount(selector) { // selector参数会传入根节点
+      const container = document.querySelector(selector); // 搜索这个根节点。并将之作为容器接纳后面的子节点
+      let isMounted = false; // 判断是不是第一次进入这里，如果是第一次进入这里，就是挂载根节点(根组件)。如果不是第一次进入这里，就是重新渲染根组件
+      let oldVNode = null;
+
+      watchEffect(function() { // watchEffect 负责监听副作用
+        if (!isMounted) { // 第一次使用createApp()进入这里，需要将根组件中render()的返回值渲染成为虚拟节点，然后挂载到根节点中(此时真实DOM只有根结点，直接挂载即可)
+          oldVNode = rootComponent.render(); 
+          mount(oldVNode, container); 
+          isMounted = true; // 将isMounted设置为true， 代表的是已经进入过这里了，后面就是要比较新旧节点了
+        } else {
+          const newVNode = rootComponent.render();
+          patch(oldVNode, newVNode);
+          oldVNode = newVNode;
+        }
+      })
+    }
+  }
+}
+```
+
+## 测试此框架
+测试样例：
+```js
+<body>
+
+  <div id="app"></div>
+  <script src="../01-渲染模块/renderer.js"></script>
+  <script src="../02-响应式系统模块/03_reactive_vue3实现.js"></script>
+  <script src="./createApp.js"></script>
+
+  <script>
+    // 1.创建根组件
+    const App = {
+      data: reactive({
+        counter: 0
+      }),
+      render() {
+        return h("div", null, [
+          h("h2", null, `当前计数: ${this.data.counter}`),
+          h("button", {
+            onClick: () => {
+              this.data.counter++
+              console.log(this.data.counter);
+            }
+          }, "+1")
+        ])
+      }
+    }
+
+    // 2.挂载根组件
+    const app = createApp(App);
+    app.mount("#app");
+  </script>
+
+</body>
+```
+
+测试结果：
+
+![结果](https://cdn.jsdelivr.net/gh/jsdevin/imgBed/img/202207200213382.gif)
+
+## 线上发布版本
+[线上版本点击这里查看](http://minivue.devin.ren) 
+
+## 项目总结
